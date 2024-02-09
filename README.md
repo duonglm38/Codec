@@ -10,9 +10,9 @@ pip install -r requirements.txt
 ```
 
 ## Quick usage
-We have provided a simple code to run Codec in `example.py`:
+We have provided a simple code to run Codec in `example.py`: 
  ```
- MODEL="/path/to/model"
+ MODEL="ychenNLP/nllb-200-distilled-1.3B-easyproject"
  SRC_TEXT="Only France and [ Britain ] backed Fischler 's proposal ."
  TEMPLATE="Faransi ni Angiletɛri dɔrɔn de ye Fischler ka laɲini dɛmɛ ."
  
@@ -21,3 +21,16 @@ We have provided a simple code to run Codec in `example.py`:
             --template ${TEMPLATE} \
             --model_name_or_path ${MODEL}  
  ```
+The current codebase supports mBART, M2M-100, and NLLB model checkpoints
+
+
+## Citation
+If you use this codebase in your work, please consider citing our paper:
+```
+@article{le2024constrained,
+  title={Constrained Decoding for Cross-lingual Label Projection},
+  author={Le, Duong Minh and Chen, Yang and Ritter, Alan and Xu, Wei},
+  journal={arXiv preprint arXiv:2402.03131},
+  year={2024}
+}
+```

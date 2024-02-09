@@ -35,7 +35,7 @@ if __name__ == '__main__':
                    [tokenizer.eos_token_id]
 
     template_ids = torch.LongTensor(template_ids)
-    bracket_stack = [']', '[']
+    bracket_stack = [']', '[']  # order to insert marker: '[' -> ']', can be extended to multiple marker pairs
     template_length = template_ids.shape[-1] - 3
     print("Input:", src_text)
     print("template:", template_text)
