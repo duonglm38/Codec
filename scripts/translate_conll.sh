@@ -17,7 +17,7 @@ MODEL_NAME_OR_PATH="facebook/nllb-200-3.3B"
 
 for idx in {1..18}; do
   TGT_LANG=$(sed -n "${idx}p" masakha_lang_ids.txt)
-  python nllb_translation_tasks.py \
+  python pipelines/nllb_translation_tasks.py \
                               --source_language eng_Latn \
                               --target_language $TGT_LANG \
                               --model_name_or_path $MODEL_NAME_OR_PATH \
@@ -29,7 +29,7 @@ for idx in {1..18}; do
 
   sacremoses -l en -j 4 tokenize  < "$OUTPUT_TRANSL_DIR/conll_en_train_org_${TGT_LANG}.txt" > "$OUTPUT_TRANSL_DIR/conll_en_train_org_${TGT_LANG}.txt.tok"
 
-  python nllb_translation_tasks.py \
+  python pipelines/nllb_translation_tasks.py \
                               --source_language eng_Latn \
                               --target_language $TGT_LANG \
                               --model_name_or_path $MODEL_NAME_OR_PATH \
