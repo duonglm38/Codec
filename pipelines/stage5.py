@@ -325,245 +325,6 @@ def marker_decode_test(tokens, labels, mt):
     return new_sentence, new_labels
 
 
-def re_ranking1(input_data, en_examples):
-    data = []
-    for idx, d in enumerate(tqdm(input_data)):
-        trans_entity_list = en_examples[idx].ent_trans[args.tgt_lang]
-        trans_entity_list = [i.lower() for i in trans_entity_list]
-        en_entity_list = en_examples[idx].entity_list
-        en_entity_list = [' '.join(tmp).lower() for tmp in en_entity_list]
-        if d["flag"] == 0 or d["flag"] == -1:
-            data.append({
-                "template": d['template'],
-                "tgt_lang": None,
-                "score": d["score"],
-                "reversed_scores": [],
-                "flag": d["flag"]
-            })
-        else:
-            final_candidates = []
-            r_logp_scores = []
-            lex_overlap_scores = []
-            if len(d['tgt_lang']) == len(en_entity_list):
-                flag = True
-                for iidx, (r_scores, candidates) in enumerate(zip(d["reversed_scores"], d["tgt_lang"])):
-                    r_score_wid = sorted([[_, i] for i, _ in enumerate(r_scores)])
-
-                    lex_overlap_wid = []
-                    for iiidx, candidate in enumerate(candidates):
-                        marker_entity = extract_marker_entity(candidate).lower()
-                        ratio1 = similar(marker_entity, en_entity_list[iidx])
-                        ratio2 = similar(marker_entity, trans_entity_list[iidx])
-                        lex_overlap_wid.append([max(ratio1, ratio2), iiidx])
-                    sorted_lex_overlap_wid = sorted(lex_overlap_wid, reverse=True)
-
-                    best_idx = None
-                    if sorted_lex_overlap_wid[0][0] >= 0.9:
-                        # if many items have the same ratio
-                        max_ratio = sorted_lex_overlap_wid[0][0]
-                        tmp_list = []
-                        for ratio, org_idx in sorted_lex_overlap_wid:
-                            if ratio == max_ratio:
-                                tmp_list.append([r_scores[org_idx], org_idx])
-                        if len(tmp_list) > 1:
-                            tmp_list = sorted(tmp_list)
-
-                        best_idx = tmp_list[0][1]
-                    else:
-                        for item in r_score_wid:
-                            org_idx = item[1]
-                            if lex_overlap_wid[org_idx][0] > 0.5:
-                                best_idx = org_idx
-                                break
-                    if best_idx is not None:
-                        final_candidates.append(candidates[best_idx])
-                        r_logp_scores.append(r_scores[best_idx])
-                        lex_overlap_scores.append(lex_overlap_wid[best_idx][0])
-                    else:
-                        flag = False
-            else:
-                flag = False
-            if flag:
-                data.append({
-                    "idx": idx,
-                    "src_lang": d['src_lang'],
-                    "template": d['template'],
-                    "tgt_lang": final_candidates,
-                    "r_logp_score": r_logp_scores,
-                    "lexical_score": lex_overlap_scores,
-                    "flag": 1
-                })
-            else:
-                data.append({
-                    "idx": idx,
-                    "src_lang": d['src_lang'],
-                    "template": d['template'],
-                    "tgt_lang": [None],
-                    "score": [None],
-                    "reversed_scores": [],
-                    "flag": -1
-                })
-    return data
-
-
-def re_ranking2(input_data, en_examples):
-    data = []
-    for idx, d in enumerate(tqdm(input_data)):
-        trans_entity_list = en_examples[idx].ent_trans[args.tgt_lang]
-        trans_entity_list = [i.lower() for i in trans_entity_list]
-        en_entity_list = en_examples[idx].entity_list
-        en_entity_list = [' '.join(tmp).lower() for tmp in en_entity_list]
-        if d["flag"] == 0 or d["flag"] == -1:
-            data.append({
-                "template": d['template'],
-                "tgt_lang": None,
-                "score": d["score"],
-                "reversed_scores": [],
-                "flag": d["flag"]
-            })
-        else:
-            final_candidates = []
-            r_logp_scores = []
-            lex_overlap_scores = []
-            if len(d['tgt_lang']) == len(en_entity_list):
-                flag = True
-                for iidx, (r_scores, candidates) in enumerate(zip(d["reversed_scores"], d["tgt_lang"])):
-                    best_idx = None
-                    for iiidx, candidate in enumerate(candidates):
-                        marker_entity = extract_marker_entity(candidate).lower()
-                        ratio1 = similar(marker_entity, en_entity_list[iidx])
-                        ratio2 = similar(marker_entity, trans_entity_list[iidx])
-                        if max(ratio1, ratio2) > 0.5:
-                            best_idx = iiidx
-                            break
-
-                    if best_idx is not None:
-                        final_candidates.append(candidates[best_idx])
-                        r_logp_scores.append(r_scores[best_idx])
-                    else:
-                        flag = False
-            else:
-                flag = False
-            if flag:
-                data.append({
-                    "idx": idx,
-                    "src_lang": d['src_lang'],
-                    "template": d['template'],
-                    "tgt_lang": final_candidates,
-                    "r_logp_score": r_logp_scores,
-                    "lexical_score": lex_overlap_scores,
-                    "flag": 1
-                })
-            else:
-                data.append({
-                    "idx": idx,
-                    "src_lang": d['src_lang'],
-                    "template": d['template'],
-                    "tgt_lang": [None],
-                    "score": [None],
-                    "reversed_scores": [],
-                    "flag": -1
-                })
-    return data
-
-
-def re_ranking3(input_data, en_examples):
-    data = []
-    for idx, d in enumerate(tqdm(input_data)):
-        trans_entity_list = en_examples[idx].ent_trans[args.tgt_lang]
-        trans_entity_list = [i.lower() for i in trans_entity_list]
-        en_entity_list = en_examples[idx].entity_list
-        en_entity_list = [' '.join(tmp).lower() for tmp in en_entity_list]
-        if d["flag"] == 0 or d["flag"] == -1:
-            data.append({
-                "template": d['template'],
-                "tgt_lang": None,
-                "score": d["score"],
-                "reversed_scores": [],
-                "flag": d["flag"]
-            })
-        else:
-            final_candidates = []
-            r_logp_scores = []
-            lex_overlap_scores = []
-            if len(d['tgt_lang']) == len(en_entity_list):
-                flag = True
-                for iidx, (r_scores, candidates) in enumerate(zip(d["reversed_scores"], d["tgt_lang"])):
-                    filter_candidates = []
-                    for iiidx in range(len(candidates)):
-                        candidate = candidates[iiidx]
-                        marker_entity = extract_marker_entity(candidate).lower()
-                        ratio1 = similar(marker_entity, en_entity_list[iidx])
-                        ratio2 = similar(marker_entity, trans_entity_list[iidx])
-                        lex_overlap = max(ratio1, ratio2)
-                        if lex_overlap > 0.5:
-                            filter_candidates.append([r_scores[iiidx], iiidx, lex_overlap, marker_entity])
-
-                    best_idx = None
-                    if len(filter_candidates) == 1:
-                        best_idx = filter_candidates[0][1]
-                    elif len(filter_candidates) > 1:
-                        filter_candidates = sorted(filter_candidates)
-                        r_score1, entity1_rank, lex_overlap1, entity1 = filter_candidates[0]
-                        r_score2, entity2_rank, lex_overlap2, entity2 = filter_candidates[1]
-                        is_suffix1 = entity2.endswith(entity1) and not (entity2.endswith(f" {entity1}"))
-                        is_suffix2 = entity1.endswith(entity2) and not (entity1.endswith(f" {entity2}"))
-
-                        if is_suffix1 or is_suffix2:
-                            best_idx = min(entity1_rank, entity2_rank)
-                        else:
-                            lex_overlap_wid = [[_[2], _[1], _[3], __] for __, _ in enumerate(filter_candidates)]
-                            sorted_lex_overlap_wid = sorted(lex_overlap_wid, reverse=True)
-                            tmp_list = []
-                            max_ratio = sorted_lex_overlap_wid[0][0]
-
-                            if max_ratio >= 0.9:
-                                if len(sorted_lex_overlap_wid) > 1:
-                                    entity1, r_score_rank1 = sorted_lex_overlap_wid[0][2], sorted_lex_overlap_wid[0][3]
-                                    entity2, r_score_rank2 = sorted_lex_overlap_wid[1][2], sorted_lex_overlap_wid[1][3]
-                                    if entity2.endswith(entity1) and not (entity2.endswith(f" {entity1}")):
-                                        best_idx = min(r_score_rank1, r_score_rank2)
-                                    else:
-                                        for ratio, org_idx, _, _ in sorted_lex_overlap_wid:
-                                            if ratio == max_ratio:
-                                                tmp_list.append([r_scores[org_idx], org_idx])
-                                        tmp_list = sorted(tmp_list)
-                                        best_idx = tmp_list[0][1]
-
-                                else:
-                                    best_idx = sorted_lex_overlap_wid[0][1]
-                            else:
-                                best_idx = entity1_rank
-                    if best_idx is not None:
-                        final_candidates.append(candidates[best_idx])
-                        r_logp_scores.append(r_scores[best_idx])
-                    else:
-                        flag = False
-            else:
-                flag = False
-            if flag:
-                data.append({
-                    "idx": idx,
-                    "src_lang": d['src_lang'],
-                    "template": d['template'],
-                    "tgt_lang": final_candidates,
-                    "r_logp_score": r_logp_scores,
-                    "lexical_score": lex_overlap_scores,
-                    "flag": 1
-                })
-            else:
-                data.append({
-                    "idx": idx,
-                    "src_lang": d['src_lang'],
-                    "template": d['template'],
-                    "tgt_lang": [None],
-                    "score": [None],
-                    "reversed_scores": [],
-                    "flag": -1
-                })
-    return data
-
-
 def re_ranking4(input_data, en_examples, no_filtering=False):
     data = []
     for idx, d in enumerate(tqdm(input_data)):
@@ -662,79 +423,6 @@ def re_ranking4(input_data, en_examples, no_filtering=False):
     return data
 
 
-def re_ranking4_test(input_data, en_examples, no_filtering=False):
-    data = []
-    for idx, d in enumerate(tqdm(input_data)):
-        trans_entity_list = en_examples[idx].ent_trans[args.tgt_lang]
-        trans_entity_list = [i.lower() for i in trans_entity_list]
-        en_entity_list = en_examples[idx].entity_list
-        en_entity_list = [' '.join(tmp).lower() for tmp in en_entity_list]
-        assert len(trans_entity_list) == len(en_entity_list)
-        if d["flag"] == 0 or d["flag"] == -1:
-            data.append(None)
-        else:
-            final_candidates = []
-            if len(d['tgt_lang']) == len(en_entity_list):
-                flag = True
-                for iidx, (r_scores, candidates) in enumerate(zip(d["reversed_scores"], d["tgt_lang"])):
-                    filter_candidates = []
-                    for iiidx in range(len(candidates)):
-                        candidate = candidates[iiidx]
-                        marker_entity = extract_marker_entity(candidate).lower()
-                        ratio1 = similar(marker_entity, en_entity_list[iidx])
-                        ratio2 = similar(marker_entity, trans_entity_list[iidx])
-                        lex_overlap = max(ratio1, ratio2)
-
-                        if no_filtering or lex_overlap > 0.5 or r_scores[iiidx] < 5.:
-                            filter_candidates.append([round(r_scores[iiidx], 4), iiidx, lex_overlap, marker_entity])
-
-                    best_idx = None
-                    if len(filter_candidates) == 1:
-                        best_idx = filter_candidates[0][1]
-                    elif len(filter_candidates) > 1:
-                        lex_overlap_wid = [[-_[2], _[1], _[3], __] for __, _ in enumerate(filter_candidates)]
-                        sorted_lex_overlap_wid = sorted(lex_overlap_wid)
-                        tmp_list = []
-                        max_ratio = -sorted_lex_overlap_wid[0][0]
-
-                        if max_ratio >= 0.9:
-                            if len(sorted_lex_overlap_wid) > 1:
-                                for ratio, org_idx, _, _ in sorted_lex_overlap_wid:
-                                    if -ratio == max_ratio:
-                                        tmp_list.append([round(r_scores[org_idx], 4), org_idx])
-                                tmp_list = sorted(tmp_list)
-                                best_idx = tmp_list[0][1]
-                            else:
-                                best_idx = sorted_lex_overlap_wid[0][1]
-                        else:
-                            r_score1, entity1_rank, lex_overlap1, entity1 = filter_candidates[0]
-                            filter_candidates = sorted(filter_candidates)
-                            # _entity1 = re.sub('([?,.!:\'\"])', r' \1 ', entity1)
-                            # _entity1 = re.sub(' +', ' ', _entity1.strip())
-                            for iiidx in range(len(filter_candidates)):
-                                r_score_n, entity_n_rank, _, entity_n = filter_candidates[iiidx]
-                                if r_score_n < r_score1 and (entity1.endswith(" " + entity_n) or
-                                                             entity1.startswith(entity_n + " ")):
-                                    # _entity_n = re.sub('([?,.!:\'\"])', r' \1 ', entity_n)
-                                    # _entity_n = re.sub(' +', ' ', _entity_n.strip())
-                                    # if r_score_n < r_score1 and f" {_entity_n} " in f" {_entity1} ":
-                                    best_idx = entity_n_rank
-                                    break
-                            if best_idx is None:
-                                best_idx = entity1_rank
-                    if best_idx is not None:
-                        final_candidates.append(best_idx)
-                    else:
-                        flag = False
-            else:
-                flag = False
-            if flag:
-                data.append(final_candidates)
-            else:
-                data.append(None)
-    return data
-
-
 def main(args):
     logger.info("Stage 5:......................")
     with open(args.input_file) as f:
@@ -756,65 +444,22 @@ def main(args):
     ent_trans = [i.strip() for i in ent_trans]
 
     start = 0
-    if args.use_partial_entity_file:
-        assert args.sample_ids_path
-        num_entities = 0
-        for idx in sample_ids:
-            tag_list = en_examples[idx].tag_list
-            entity_list = en_examples[idx].entity_list
-            non_misc_entity = [_ for _ in range(len(tag_list)) if tag_list[_] != 'MISC']
-            tag_list = [tag_list[_] for _ in non_misc_entity]
-            entity_list = [entity_list[_] for _ in non_misc_entity]
-            length_entity = len(entity_list)
-            end = start + length_entity
-            ent_trans_tmp = ent_trans[start: end]
-            assert len(ent_trans_tmp) == length_entity
-            en_examples[idx].tag_list = tag_list
-            en_examples[idx].entity_list = entity_list
-            en_examples[idx].add_ent_translation(args.tgt_lang, ent_trans_tmp)
-            start = end
-            num_entities += length_entity
-        assert len(ent_trans) == num_entities
-    else:
-        for idx, examples in enumerate(en_examples):
-            length_entity = len(en_examples[idx].entity_list)
-            end = start + length_entity
-            ent_trans_tmp = ent_trans[start: end]
-            assert len(ent_trans_tmp) == length_entity
 
-            en_examples[idx].add_ent_translation(args.tgt_lang, ent_trans_tmp)
-            start = end
+    for idx, examples in enumerate(en_examples):
+        length_entity = len(en_examples[idx].entity_list)
+        end = start + length_entity
+        ent_trans_tmp = ent_trans[start: end]
+        assert len(ent_trans_tmp) == length_entity
 
-    # for idx in range(len(en_examples)):
-    #     tag_list = en_examples[idx].tag_list
-    #     entity_list = en_examples[idx].entity_list
-    #     ent_trans_list = en_examples[idx].ent_trans[args.tgt_lang]
-    #
-    #     non_misc_entity = [_ for _ in range(len(tag_list)) if tag_list[_] != 'MISC']
-    #     tag_list = [tag_list[_] for _ in non_misc_entity]
-    #     entity_list = [entity_list[_] for _ in non_misc_entity]
-    #     ent_trans_list = [ent_trans_list[_] for _ in non_misc_entity]
-    #     en_examples[idx].tag_list = tag_list
-    #     en_examples[idx].entity_list = entity_list
-    #     en_examples[idx].ent_trans[args.tgt_lang] = ent_trans_list
+        en_examples[idx].add_ent_translation(args.tgt_lang, ent_trans_tmp)
+        start = end
 
     if args.sample_ids_path:
         en_examples = [en_examples[_] for _ in sample_ids]
     assert len(input_data) == len(en_examples)
     logger.info("Number of input examples: {}".format(len(input_data)))
     # Stage 5.1: Re-ranking and filtering
-    if args.mode == 1:
-        data = re_ranking1(input_data=input_data,
-                           en_examples=en_examples)
-    elif args.mode == 2:
-        data = re_ranking2(input_data=input_data,
-                           en_examples=en_examples)
-    elif args.mode == 3:
-        data = re_ranking3(input_data=input_data,
-                           en_examples=en_examples)
-    else:
-        data = re_ranking4(input_data=input_data,
-                           en_examples=en_examples)
+    data = re_ranking4(input_data=input_data, en_examples=en_examples)
 
     # print(json.dumps(data, indent=2))
     # Stage 5.2: create dataset
@@ -877,7 +522,6 @@ if __name__ == '__main__':
     parser.add_argument("--sample_ids_path", type=str, default=None)
     parser.add_argument("--no_filtering", action="store_true")
     parser.add_argument("--tokenizer_path", type=str, default=None)
-    parser.add_argument("--use_partial_entity_file", action="store_true")
     args = parser.parse_args()
     main(args)
 

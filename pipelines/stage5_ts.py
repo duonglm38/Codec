@@ -12,7 +12,7 @@ from tqdm import tqdm
 from xml.sax.saxutils import unescape
 from sacremoses import MosesTokenizer
 from difflib import SequenceMatcher
-from masakhaner.process_en_data import InputExample, save_pickle
+from pipelines.process_en_data import InputExample, save_pickle
 from utils import post_process
 import logging
 from transformers import AutoTokenizer

@@ -8,22 +8,19 @@ LANG_MOSES="${TGTLANG}"
 FUTURE_STEP=1   # lower bound hyperparameter
 
 CoNLL03_PATH="path/to/CoNLL03"
+
+# The 5 below files are extracted by the `translate_conll.sh` script
 ORIGINAL_FILE=""   # <- file contains sentences from CoNLL03, one sentence per line
 ENTITY_TRANS_PATH=""   # <- file contain translation of each entity from CoNLL03, one entity per line
 TEMPLATE_FILE=""   # <- file contains translation of the ORIGINAL_FILE, one sentence per line
-TOK_TEMPLATE_FILE=""   # <- file contains tokenization of the TEMPLATE_FILE (use script below)
+TOK_TEMPLATE_FILE=""   # <- file contains tokenization of the TEMPLATE_FILE
+CONLL_PKL_FILE=""  # <- path to the `conll_en_train_examples.pkl` file
 
 OUTPUT_DIR="outputs/${LANG_MOSES}"
 OUTPUT_DIR1="${OUTPUT_DIR}/${MODEL}_preprocess"
 OUTPUT_DIR2="${OUTPUT_DIR}/${MODEL}_iter_${FUTURE_STEP}/search_results"
 OUTPUT_DIR3="${OUTPUT_DIR}/${MODEL}_iter_${FUTURE_STEP}"
 OUTPUT_DIR4="path/to/output/augmented/data"
-
-### Process CoNLL03
-sacremoses -l en -j 4 tokenize  < ${TEMPLATE_FILE} > ${TOK_TEMPLATE_FILE}
-python pipelines/process_en_data.py \
-                  --input_path ${INPUT_FILE_PATH} \
-                  --output_path "conll_en_train_examples.pkl"\
 
 
 ### Preprocess
@@ -90,7 +87,7 @@ python pipelines/stage5.py \
                 --input_file ${OUTPUT_DIR3}/stage4.json \
                 --output_path ${OUTPUT_DIR3} \
                 --entity_trans_path ${ENTITY_TRANS_PATH} \
-                --conll_en_pkl_path conll_en_train_examples.pkl \
+                --conll_en_pkl_path ${CONLL_PKL_FILE} \
                 --tgt_lang ${LANG_MOSES} \
                 --mode 4 \
                 --tokenizer_path ${TOKENIZER_PATH} \

@@ -217,17 +217,24 @@ def save_pickle(file_name, data):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_path", type=str, required=True)
-    parser.add_argument("--output_path", type=str, default='conll_en_train_examples.pkl')
+    parser.add_argument("--output_dir", type=str, required=True)
     args = parser.parse_args()
 
     examples = read_examples_from_file(args.input_path, 'en')
-    save_pickle(args.output_path, examples)
 
     print(examples[0])
-
     print(examples[120])
 
-    print(examples[400])
+    org_sentences, entities = [], []
+    for example in examples:
+        org_sentences.append(' '.join(example.words))
+        entities.extend(example.entity_list)
 
-    print(examples[5000])
-
+    pkl_path = os.path.join(args.output_dir, "conll_en_train_examples.pkl")
+    org_sentence_path = os.path.join(args.output_dir, "conll_en_train_org.txt")
+    entity_path = os.path.join(args.output_dir, "conll_en_train_entity.txt")
+    save_pickle(pkl_path, examples)
+    with open(org_sentence_path, 'w') as f:
+        f.write('\n'.join(org_sentences))
+    with open(entity_path, 'w') as f:
+        f.write('\n'.join(entities))
