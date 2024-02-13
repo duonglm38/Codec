@@ -16,7 +16,7 @@ ENTITY_PATH="${OUTPUT_DIR}/conll_en_train_entity.txt"
 MODEL_NAME_OR_PATH="facebook/nllb-200-3.3B"
 
 for idx in {1..18}; do
-  TGT_LANG=$(sed -n "${idx}p" masakha_lang_ids.txt)
+  TGT_LANG=$(sed -n "${idx}p" scripts/masakha_lang_ids.txt)
   python pipelines/nllb_translation_tasks.py \
                               --source_language eng_Latn \
                               --target_language $TGT_LANG \
