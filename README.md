@@ -21,7 +21,7 @@ We have provided a simple code to run Codec in `example.py`:
             --template ${TEMPLATE} \
             --model_name_or_path ${MODEL}  
  ```
-The current codebase supports mBART, M2M-100, and NLLB model checkpoints
+The current codebase supports mBART, M2M-100, and NLLB model checkpoints. The fine-tuned version of NLLB-600M can be downloaded <a href="https://drive.google.com/file/d/1huu8QuzlbGwkbXfn9_xiWfUNY_B7ePaj/view?usp=sharing"> here </a>.
 
 
 ## Cross-lingual NER
@@ -35,14 +35,21 @@ The current codebase supports mBART, M2M-100, and NLLB model checkpoints
   * This script will prepare the input to Codec, run Codec, and create the augmented training data on the target language
 * To train the NER model, we use the code and script from <a href="https://github.com/edchengg/easyproject/tree/main/ner#ner-training"> this repo </a>
 
+### Translate test
+
+* Train an English NER model on CoNLL-2003 dataset (code: <a href="https://github.com/edchengg/easyproject/tree/main/ner#ner-training"> this repo </a>). In CoNLL-2003, we convert all `MISC` to `O` tag before training.
+* Translate the test data to English (code: `pipelines/nllb_translation_tasks.py`), than use the English NER model to annotate.
+* Run the script `scripts/masakhaner_translate_test.sh`, you will need to edit the target language, input and output paths first
 
 ## Citation
 If you use this codebase in your work, please consider citing our paper:
 ```
-@article{le2024constrained,
-  title={Constrained Decoding for Cross-lingual Label Projection},
-  author={Le, Duong Minh and Chen, Yang and Ritter, Alan and Xu, Wei},
-  journal={arXiv preprint arXiv:2402.03131},
-  year={2024}
+@inproceedings{
+le2024constrained,
+title={Constrained Decoding for Cross-lingual Label Projection},
+author={Duong Minh Le and Yang Chen and Alan Ritter and Wei Xu},
+booktitle={The Twelfth International Conference on Learning Representations},
+year={2024},
+url={https://openreview.net/forum?id=DayPQKXaQk}
 }
 ```
