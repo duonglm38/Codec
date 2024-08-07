@@ -10,18 +10,23 @@ pip install -r requirements.txt
 ```
 
 ## Quick usage
+[!important] We have noticed strange behaviors in the `transformers` tokenizer when loading from finetuned NLLB checkpoints. To reproduce the results in the paper, please load the tokenizer from the original NLLB checkpoints (e.g., `facebook/nllb-200-distilled-1.3B`).
+
 We have provided a simple code to run Codec in `example.py`: 
  ```
  MODEL="ychenNLP/nllb-200-distilled-1.3B-easyproject"
+ NLLB_TOKENIZER="facebook/nllb-200-distilled-1.3B"  # <--- Load from the original NLLB checkpoint
+
  SRC_TEXT="Only France and [ Britain ] backed Fischler 's proposal ."
  TEMPLATE="Faransi ni Angiletɛri dɔrɔn de ye Fischler ka laɲini dɛmɛ ."
  
  python example.py \
             --src_text ${SRC_TEXT} \
             --template ${TEMPLATE} \
-            --model_name_or_path ${MODEL}  
+            --model_name_or_path ${MODEL} \
+            --tokenizer_path ${NLLB_TOKENIZER}
  ```
-The current codebase supports mBART, M2M-100, and NLLB model checkpoints. The fine-tuned version of NLLB-600M can be downloaded <a href="https://drive.google.com/file/d/1huu8QuzlbGwkbXfn9_xiWfUNY_B7ePaj/view?usp=sharing"> here </a>.
+The current codebase supports mBART, M2M-100, and NLLB model checkpoints. The fine-tuned version of NLLB-600M can be downloaded <a href="https://drive.google.com/file/d/1huu8QuzlbGwkbXfn9_xiWfUNY_B7ePaj/view?usp=sharing"> here </a> ([!NOTE] please load the NLLB tokenizer from `facebook/nllb-200-distilled-600M` when using this checkpoint).
 
 
 ## Cross-lingual NER
